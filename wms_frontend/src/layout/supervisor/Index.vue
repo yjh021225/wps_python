@@ -15,7 +15,7 @@
 
     <el-container>
       <el-header class="header">
-        <div class="header-left"><span class="page-title">仓库主管控制台</span></div>
+        <div class="header-left"><span class="page-title">仓库管理员控制台</span></div>
         <div class="header-right">
           <el-dropdown trigger="click" @command="handleCommand">
             <span class="user-dropdown">

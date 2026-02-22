@@ -8,8 +8,8 @@ class User(AbstractUser):
     """
     ROLE_CHOICES = (
         ('admin', '系统管理员'),
-        ('supervisor', '仓库主管'),
-        ('operator', '普通操作员'),
+        ('supervisor', '仓库管理员'),
+        ('operator', '普通查询员'),
     )
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='operator', verbose_name='系统角色')

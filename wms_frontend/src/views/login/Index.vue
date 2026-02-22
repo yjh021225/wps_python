@@ -56,7 +56,7 @@
 
           <div class="form-options">
             <el-checkbox v-model="rememberMe">记住密码</el-checkbox>
-            <el-link type="primary" :underline="false">忘记密码？</el-link>
+            <el-link type="primary" :underline="false" @click="forgotDialogVisible = true">忘记密码？</el-link>
           </div>
 
           <el-form-item>
@@ -72,6 +72,22 @@
         </el-form>
       </div>
     </div>
+
+    <el-dialog title="重置密码安全验证" v-model="forgotDialogVisible" width="400px" destroy-on-close>
+      <el-form ref="forgotFormRef" :model="forgotForm" :rules="forgotRules" label-width="80px">
+        <el-alert title="验证成功后，密码将重置为 123456" type="info" show-icon style="margin-bottom: 20px;" :closable="false" />
+        <el-form-item label="登录账号" prop="username">
+          <el-input v-model="forgotForm.username" placeholder="请输入您的账号" />
+        </el-form-item>
+        <el-form-item label="真实姓名" prop="real_name">
+          <el-input v-model="forgotForm.real_name" placeholder="请输入系统登记的真实姓名" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="forgotDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleResetPassword" :loading="resetLoading">验证并重置</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -135,6 +151,39 @@ const handleLogin = () => {
       .finally(() => {
         loading.value = false
       })
+    }
+  })
+}
+
+// ================= 忘记密码核心逻辑 =================
+const forgotDialogVisible = ref(false)
+const forgotFormRef = ref(null)
+const resetLoading = ref(false)
+
+const forgotForm = reactive({
+  username: '',
+  real_name: ''
+})
+
+const forgotRules = {
+  username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
+  real_name: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }]
+}
+
+const handleResetPassword = async () => {
+  if (!forgotFormRef.value) return
+  await forgotFormRef.value.validate(async (valid) => {
+    if (valid) {
+      resetLoading.value = true
+      try {
+        const res = await axios.post('http://127.0.0.1:8000/api/users/forgot_password/', forgotForm)
+        ElMessage.success({ message: res.data.message, duration: 5000 })
+        forgotDialogVisible.value = false
+      } catch (error) {
+        ElMessage.error(error.response?.data?.error || '验证失败，请核对信息！')
+      } finally {
+        resetLoading.value = false
+      }
     }
   })
 }

@@ -1,16 +1,16 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import transaction
 from django.utils import timezone
-
-from .models import Supplier, Warehouse, StorageLocation, ProductCategory, Product, Inventory, Order, OrderItem
+from django.contrib.auth.hashers import make_password, check_password # 新增密码处理工具
+from .models import Supplier, Warehouse, StorageLocation, ProductCategory, Product, Inventory, Order, OrderItem,User
 from .serializers import (
     SupplierSerializer, WarehouseSerializer, StorageLocationSerializer,
-    ProductCategorySerializer, ProductSerializer, InventorySerializer, OrderSerializer
+    ProductCategorySerializer, ProductSerializer, InventorySerializer, OrderSerializer,UserSerializer
 )
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -142,3 +142,52 @@ class OrderViewSet(viewsets.ModelViewSet):
             inv.save()
 
         return Response({'message': '出库作业完成', 'order_no': order.order_no})
+
+class UserViewSet(viewsets.ModelViewSet):
+    """系统用户与账号权限管理接口"""
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    # ================= 下面是新增的个人中心与密码相关接口 =================
+
+    @action(detail=False, methods=['get', 'put'])
+    def profile(self, request):
+        """个人设置：获取或修改当前登录用户信息"""
+        user = request.user
+        if request.method == 'GET':
+            serializer = self.get_serializer(user)
+            return Response(serializer.data)
+        elif request.method == 'PUT':
+            # 只允许修改真实姓名等非敏感信息
+            user.real_name = request.data.get('real_name', user.real_name)
+            user.save()
+            return Response({'message': '个人信息更新成功', 'real_name': user.real_name})
+
+    @action(detail=False, methods=['post'])
+    def update_password(self, request):
+        """个人设置：修改密码"""
+        user = request.user
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+
+        if not check_password(old_password, user.password):
+            return Response({'error': '原密码错误，修改失败！'}, status=400)
+
+        user.password = make_password(new_password)
+        user.save()
+        return Response({'message': '密码修改成功，请使用新密码重新登录！'})
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def forgot_password(self, request):
+        """忘记密码：通过账号和真实姓名重置为默认密码 (无需登录即可访问)"""
+        username = request.data.get('username')
+        real_name = request.data.get('real_name')
+        try:
+            # 必须账号和真实姓名完全匹配才能重置
+            user = User.objects.get(username=username, real_name=real_name)
+            user.password = make_password('123456')
+            user.save()
+            return Response({'message': '身份验证成功！您的密码已重置为：123456。请登录后尽快修改。'})
+        except User.DoesNotExist:
+            return Response({'error': '账号或真实姓名不匹配，验证失败！'}, status=400)
