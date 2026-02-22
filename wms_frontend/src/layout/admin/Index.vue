@@ -75,7 +75,8 @@ const handleCommand = (command) => {
     // 返回登录页
     router.push('/login')
   } else if (command === 'profile') {
-    ElMessage.info('个人设置功能正在开发中...')
+
+    router.push('/admin/profile')
   }
 }
 </script>

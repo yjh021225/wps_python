@@ -20,7 +20,8 @@ const routes = [
       { path: 'dashboard', component: () => import('../views/operator/Dashboard.vue') },
       { path: 'inbound', component: () => import('../views/operator/Inbound.vue') },
       { path: 'outbound', component: () => import('../views/operator/Outbound.vue') },
-      { path: 'history', component: () => import('../views/operator/History.vue') }
+      { path: 'history', component: () => import('../views/operator/History.vue') },
+        { path: 'profile', component: () => import('../views/Profile.vue') }
     ]
   },
   // ================= 2. 仓库主管路由组 =================
@@ -33,7 +34,8 @@ const routes = [
       { path: 'dashboard', component: () => import('../views/supervisor/Dashboard.vue') },
       { path: 'archives', component: () => import('../views/supervisor/Archives.vue') },
       { path: 'product', component: () => import('../views/supervisor/Product.vue') },
-      { path: 'global', component: () => import('../views/supervisor/Global.vue') }
+      { path: 'global', component: () => import('../views/supervisor/Global.vue') },
+        { path: 'profile', component: () => import('../views/Profile.vue') }
     ]
   },
   // ================= 3. 系统管理员路由组 =================
@@ -45,7 +47,8 @@ const routes = [
     children: [
       { path: 'monitor', component: () => import('../views/admin/Monitor.vue') },
       { path: 'users', component: () => import('../views/admin/Users.vue') },
-      { path: 'logs', component: () => import('../views/admin/Logs.vue') }
+      { path: 'logs', component: () => import('../views/admin/Logs.vue') },
+        { path: 'profile', component: () => import('../views/Profile.vue') }
     ]
   }
 ]

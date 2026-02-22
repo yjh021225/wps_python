@@ -60,7 +60,7 @@ const handleCommand = (command) => {
     ElMessage.success('已安全退出系统')
     router.push('/login')
   } else if (command === 'profile') {
-    ElMessage.info('个人设置功能正在开发中...')
+    router.push('/operator/profile')
   }
 }
 </script>
