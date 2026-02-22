@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import pymysql
 pymysql.install_as_MySQLdb()
 pymysql.version_info = (1, 4, 3, "final", 0)
@@ -139,4 +140,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
+}
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),   # 访问令牌有效期改为 1 天
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # 刷新令牌有效期改为 7 天
 }
